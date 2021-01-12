@@ -1,0 +1,14 @@
+name: sourcetoad/aws-codedeploy-action
+on: push
+
+jobs:
+  bash-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+
+      - name: Lint Bash
+        uses: azohra/shell-linter@latest
+        with:
+          path: '*.sh'
