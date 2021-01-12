@@ -35,7 +35,8 @@ fi
 
 # 3) Upload the deployment to S3, drop old archive.
 function getArchiveETag() {
-    aws s3api head-object --bucket "$INPUT_S3_BUCKET" \
+    aws s3api head-object \
+     --bucket "$INPUT_S3_BUCKET" \
      --key "$INPUT_S3_FOLDER"/"$ZIP_FILENAME" \
      --query ETag --output text
 }
@@ -47,7 +48,8 @@ rm "$ZIP_FILENAME"
 
 # 4) Start the CodeDeploy
 function getActiveDeployments() {
-    aws deploy list-deployments --application-name "$INPUT_CODEDEPLOY_NAME" \
+    aws deploy list-deployments \
+        --application-name "$INPUT_CODEDEPLOY_NAME" \
         --deployment-group-name "$INPUT_CODEDEPLOY_GROUP" \
         --include-only-statuses "Queued" "InProgress" "Stopped" |  jq -r '.deployments';
 }
