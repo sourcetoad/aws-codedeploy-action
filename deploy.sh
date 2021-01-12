@@ -57,7 +57,7 @@ function pollForActiveDeployments() {
     while [ "$(getActiveDeployments)" != "[]" ]; do
         echo -e "$ORANGE Deployment in progress. Sleeping 15 seconds. (Try $((++deadlockCounter)))";
 
-        if [ "$deadlockCounter" -gt "$MAX_POLLING_ITERATIONS" ]; then
+        if [ "$deadlockCounter" -gt "$INPUT_MAX_POLLING_ITERATIONS" ]; then
             echo -e "$RED Max polling iterations reached (max_polling_iterations)."
             exit 1;
         fi
