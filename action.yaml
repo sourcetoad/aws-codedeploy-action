@@ -1,0 +1,40 @@
+name: 'AWS CodeDeploy'
+description: 'Deploy projects to EC2 via CodeDeploy'
+inputs:
+  aws_access_key:
+    description: 'AWS Access Key'
+    required: true
+  aws_secret_key:
+    description: 'AWS Secret Key'
+    required: true
+  aws_region:
+    description: 'AWS Region'
+    required: false
+    default: 'us-east-1'
+  s3_bucket:
+    description: 'S3 Bucket for CodeDeploy Assets'
+    required: true
+  s3_prefix:
+    description: 'S3 Prefix for ZIP. Defaults to $BUILD#-$BUILDSHAHASH.zip'
+    required: false
+    default: ''
+  s3_folder:
+    description: 'S3 Folder for ZIP.'
+    required: true
+  directory:
+    description: 'Directory to be archived instead of entire workspace.'
+    required: false
+  excluded_files:
+    description: 'Files to be excluded during archiving (space delimited).'
+    required: false
+  codedeploy_name:
+    description: 'AWS CodeDeploy Application Name'
+    required: true
+  codedeploy_group:
+    description: 'AWS CodeDeploy Application Group'
+    required: true
+runs:
+    using: 'docker'
+    image: 'Dockerfile'
+    entrypoint: '/deploy.sh'
+    post-entrypoint: '/cleanup.sh'
