@@ -20,9 +20,13 @@ if [ ! -f "$DIR_TO_ZIP/appspec.yml" ]; then
 fi
 
 ZIP_FILENAME=$GITHUB_RUN_ID-$GITHUB_SHA.zip
-EXCLUDED_FILES_COMMAND=$(sed -En "s/ /-x/p")
 
-zip -r --quiet "$ZIP_FILENAME" "$DIR_TO_ZIP" -x "$EXCLUDED_FILES_COMMAND" -x \*.git\*
+# This creates a temp file to explode space delimited excluded files
+# into newline delimited exclusions passed to "-x" on the zip command.
+EXCLUSION_FILE=$(mktemp /tmp/zip-excluded.XXXXXX)
+echo "$INPUT_EXCLUDED_FILES" | tr ' ' '\n' > "$EXCLUSION_FILE"
+
+zip -r --quiet "$ZIP_FILENAME" "$DIR_TO_ZIP" -x"@$EXCLUSION_FILE"
 if [ ! -f "$ZIP_FILENAME" ]; then
     echo "::error::$ZIP_FILENAME was not generated properly (zip generation failed)."
     exit 1;
