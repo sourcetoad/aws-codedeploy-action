@@ -1,6 +1,11 @@
 #!/bin/bash -l
 set -e
-MAX_POLLING_ITERATIONS=60
+
+NO_COLOR='\033[0m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+BLUE='\033[0;34m'
 
 # 1) Load our permissions in for aws-cli
 export AWS_ACCESS_KEY_ID=$INPUT_AWS_ACCESS_KEY
@@ -50,10 +55,10 @@ function getActiveDeployments() {
 function pollForActiveDeployments() {
     deadlockCounter=0;
     while [ "$(getActiveDeployments)" != "[]" ]; do
-        echo "::warning::Deployment in progress. Sleeping 15 seconds. (Try $((++deadlockCounter)))";
+        echo -e "$ORANGE Deployment in progress. Sleeping 15 seconds. (Try $((++deadlockCounter)))";
 
         if [ "$deadlockCounter" -gt "$MAX_POLLING_ITERATIONS" ]; then
-            echo "::error:: Max polling iterations reached (15min)."
+            echo -e "$RED Max polling iterations reached (max_polling_iterations)."
             exit 1;
         fi
         sleep 15s;
@@ -70,10 +75,10 @@ function deployRevision() {
         --s3-location bucket="$INPUT_S3_BUCKET",bundleType=zip,eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" > /dev/null 2>&1
 }
 
-echo "Deploying to $INPUT_CODEDEPLOY_GROUP.";
+echo -e "$BLUE Deploying to $NO_COLOR$INPUT_CODEDEPLOY_GROUP.";
 deployRevision
 
 sleep 10;
 pollForActiveDeployments
-echo "Deployed to $INPUT_CODEDEPLOY_GROUP!";
+echo -e "$GREEN Deployed to $NO_COLOR$INPUT_CODEDEPLOY_GROUP!";
 exit 0;
