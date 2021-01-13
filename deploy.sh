@@ -58,6 +58,49 @@ function getActiveDeployments() {
         --include-only-statuses "Queued" "InProgress" |  jq -r '.deployments';
 }
 
+function getSpecificDeployment() {
+    aws deploy get-deployment \
+        --deployment-id "$1";
+}
+
+function pollForSpecificDeployment() {
+    deadlockCounter=0;
+
+    while true; do
+        RESPONSE=$(getSpecificDeployment "$1")
+        FAILED_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Failed')
+        IN_PROGRESS_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.InProgress')
+        SKIPPED_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Skipped')
+        SUCCESS_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Succeeded')
+        PENDING_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Pending')
+        STATUS=$(echo "$RESPONSE" | jq -r '.deploymentInfo.status')
+
+        echo -e "$ORANGE Deployment in progress. Sleeping 15 seconds. (Try $((++deadlockCounter)))";
+        echo -e "Instance Overview: $RED Failed ($FAILED_COUNT), $BLUE In-Progress ($IN_PROGRESS_COUNT), $NO_COLOR Skipped ($SKIPPED_COUNT), $BLUE Pending ($PENDING_COUNT), $GREEN Succeeded ($SUCCESS_COUNT)"
+        echo -e "Deployment Status: $STATUS"
+
+        if [ "$FAILED_COUNT" -gt 0 ]; then
+            echo -e "$RED Failed instance detected (Failed count over zero)."
+            exit 1;
+        fi
+
+        if [ "$STATUS" = "Failed" ]; then
+            echo -e "$RED Failed deployment detected (Failed status)."
+            exit 1;
+        fi
+
+        if [ "$STATUS" = "Succeeded" ]; then
+            break;
+        fi
+
+        if [ "$deadlockCounter" -gt "$INPUT_MAX_POLLING_ITERATIONS" ]; then
+            echo -e "$RED Max polling iterations reached (max_polling_iterations)."
+            exit 1;
+        fi
+        sleep 15s;
+    done;
+}
+
 function pollForActiveDeployments() {
     deadlockCounter=0;
     while [ "$(getActiveDeployments)" != "[]" ]; do
@@ -78,7 +121,7 @@ function deployRevision() {
         --application-name "$INPUT_CODEDEPLOY_NAME" \
         --deployment-group-name "$INPUT_CODEDEPLOY_GROUP" \
         --description "$GITHUB_REF - $GITHUB_SHA" \
-        --s3-location bucket="$INPUT_S3_BUCKET",bundleType=zip,eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" > /dev/null 2>&1
+        --s3-location bucket="$INPUT_S3_BUCKET",bundleType=zip,eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" | jq -r '.deploymentId'
 }
 
 function registerRevision() {
@@ -94,10 +137,10 @@ if $INPUT_CODEDEPLOY_REGISTER_ONLY; then
     echo -e "$BLUE Registered deployment to $NO_COLOR$INPUT_CODEDEPLOY_GROUP!";
 else
     echo -e "$BLUE Deploying to $NO_COLOR$INPUT_CODEDEPLOY_GROUP.";
-    deployRevision
+    DEPLOYMENT_ID=$(deployRevision)
 
     sleep 10;
-    pollForActiveDeployments
+    pollForSpecificDeployment "$DEPLOYMENT_ID"
     echo -e "$GREEN Deployed to $NO_COLOR$INPUT_CODEDEPLOY_GROUP!";
 fi
 
