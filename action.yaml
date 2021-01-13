@@ -1,5 +1,10 @@
 name: 'AWS CodeDeploy'
 description: 'Deploy projects to EC2 via CodeDeploy'
+author: Sourcetoad
+branding:
+  color: 'yellow'
+  icon: 'server'
+
 inputs:
   aws_access_key:
     description: 'AWS Access Key'
