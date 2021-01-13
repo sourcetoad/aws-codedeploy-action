@@ -55,7 +55,7 @@ function getActiveDeployments() {
     aws deploy list-deployments \
         --application-name "$INPUT_CODEDEPLOY_NAME" \
         --deployment-group-name "$INPUT_CODEDEPLOY_GROUP" \
-        --include-only-statuses "Queued" "InProgress" "Stopped" |  jq -r '.deployments';
+        --include-only-statuses "Queued" "InProgress" |  jq -r '.deployments';
 }
 
 function pollForActiveDeployments() {
