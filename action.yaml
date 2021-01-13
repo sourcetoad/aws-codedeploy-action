@@ -14,10 +14,6 @@ inputs:
   s3_bucket:
     description: 'S3 Bucket for CodeDeploy Assets'
     required: true
-  s3_prefix:
-    description: 'S3 Prefix for ZIP. Defaults to $BUILD#-$BUILDSHAHASH.zip'
-    required: false
-    default: ''
   s3_folder:
     description: 'S3 Folder for ZIP.'
     required: true
