@@ -81,10 +81,24 @@ function deployRevision() {
         --s3-location bucket="$INPUT_S3_BUCKET",bundleType=zip,eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" > /dev/null 2>&1
 }
 
-echo -e "$BLUE Deploying to $NO_COLOR$INPUT_CODEDEPLOY_GROUP.";
-deployRevision
+function registerRevision() {
+    aws deploy register-application-revision \
+        --application-name "$INPUT_CODEDEPLOY_NAME" \
+        --description "$GITHUB_REF - $GITHUB_SHA" \
+        --s3-location bucket="$INPUT_S3_BUCKET",bundleType=zip,eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" > /dev/null 2>&1
+}
 
-sleep 10;
-pollForActiveDeployments
-echo -e "$GREEN Deployed to $NO_COLOR$INPUT_CODEDEPLOY_GROUP!";
+if $INPUT_CODEDEPLOY_REGISTER_ONLY; then
+    echo -e "$BLUE Registering deployment to $NO_COLOR$INPUT_CODEDEPLOY_GROUP.";
+    registerRevision
+    echo -e "$BLUE Registered deployment to $NO_COLOR$INPUT_CODEDEPLOY_GROUP!";
+else
+    echo -e "$BLUE Deploying to $NO_COLOR$INPUT_CODEDEPLOY_GROUP.";
+    deployRevision
+
+    sleep 10;
+    pollForActiveDeployments
+    echo -e "$GREEN Deployed to $NO_COLOR$INPUT_CODEDEPLOY_GROUP!";
+fi
+
 exit 0;
