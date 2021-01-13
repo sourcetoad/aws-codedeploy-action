@@ -33,6 +33,10 @@ inputs:
   codedeploy_group:
     description: 'AWS CodeDeploy Application Group'
     required: true
+  codedeploy_mode:
+    description: 'Whether to register or deploy revision. Valid ("register" or "deploy")'
+    required: false
+    default: 'deploy'
   max_polling_iterations:
     description: 'Max amount of iterations (15s increments) to wait for a deployment'
     required: false
