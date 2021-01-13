@@ -7,12 +7,6 @@ GREEN='\033[0;32m'
 ORANGE='\033[0;33m'
 BLUE='\033[0;34m'
 
-# 0) Validation
-if [ "$INPUT_CODEDEPLOY_MODE" != "deploy" ] && [ "$INPUT_CODEDEPLOY_MODE" != "register" ]; then
-    echo "::error::$INPUT_CODEDEPLOY_MODE was not 'deploy' or 'register'."
-    exit 1;
-fi
-
 # 1) Load our permissions in for aws-cli
 export AWS_ACCESS_KEY_ID=$INPUT_AWS_ACCESS_KEY
 export AWS_SECRET_ACCESS_KEY=$INPUT_AWS_SECRET_KEY
@@ -94,17 +88,17 @@ function registerRevision() {
         --s3-location bucket="$INPUT_S3_BUCKET",bundleType=zip,eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" > /dev/null 2>&1
 }
 
-if [ "$INPUT_CODEDEPLOY_MODE" = "deploy" ]; then
+if $INPUT_CODEDEPLOY_REGISTER_ONLY; then
+    echo -e "$BLUE Registering deployment to $NO_COLOR$INPUT_CODEDEPLOY_GROUP.";
+    registerRevision
+    echo -e "$BLUE Registered deployment to $NO_COLOR$INPUT_CODEDEPLOY_GROUP!";
+else
     echo -e "$BLUE Deploying to $NO_COLOR$INPUT_CODEDEPLOY_GROUP.";
     deployRevision
 
     sleep 10;
     pollForActiveDeployments
     echo -e "$GREEN Deployed to $NO_COLOR$INPUT_CODEDEPLOY_GROUP!";
-else
-    echo -e "$BLUE Registering deployment to $NO_COLOR$INPUT_CODEDEPLOY_GROUP.";
-    registerRevision
-    echo -e "$BLUE Registered deployment to $NO_COLOR$INPUT_CODEDEPLOY_GROUP!";
 fi
 
 exit 0;
