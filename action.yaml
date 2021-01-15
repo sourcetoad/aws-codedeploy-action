@@ -1,5 +1,5 @@
-name: 'AWS CodeDeploy'
-description: 'Deploy projects to EC2 via CodeDeploy'
+name: 'Sourcetoad - AWS CodeDeploy for GitHub Actions'
+description: 'Deploy projects to EC2 via CodeDeploy for GitHub Actions'
 author: Sourcetoad
 branding:
   color: 'yellow'
