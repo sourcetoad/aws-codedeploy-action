@@ -7,6 +7,32 @@ GREEN='\033[0;32m'
 ORANGE='\033[0;33m'
 BLUE='\033[0;34m'
 
+# 0) Validation
+if [ -z "$INPUT_CODEDEPLOY_NAME" ]; then
+    echo "::error::codedeploy_name is required and must not be empty."
+    exit 1;
+fi
+
+if [ -z "$INPUT_CODEDEPLOY_GROUP" ]; then
+    echo "::error::codedeploy_group is required and must not be empty."
+    exit 1;
+fi
+
+if [ -z "$INPUT_AWS_ACCESS_KEY" ]; then
+    echo "::error::aws_access_key is required and must not be empty."
+    exit 1;
+fi
+
+if [ -z "$INPUT_AWS_SECRET_KEY" ]; then
+    echo "::error::aws_secret_key is required and must not be empty."
+    exit 1;
+fi
+
+if [ -z "$INPUT_S3_BUCKET" ]; then
+    echo "::error::s3_bucket is required and must not be empty."
+    exit 1;
+fi
+
 # 1) Load our permissions in for aws-cli
 export AWS_ACCESS_KEY_ID=$INPUT_AWS_ACCESS_KEY
 export AWS_SECRET_ACCESS_KEY=$INPUT_AWS_SECRET_KEY
