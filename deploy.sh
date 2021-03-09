@@ -33,6 +33,8 @@ if [ -z "$INPUT_S3_BUCKET" ]; then
     exit 1;
 fi
 
+echo "::debug::Input variables correctly validated."
+
 # 1) Load our permissions in for aws-cli
 export AWS_ACCESS_KEY_ID=$INPUT_AWS_ACCESS_KEY
 export AWS_SECRET_ACCESS_KEY=$INPUT_AWS_SECRET_KEY
@@ -45,6 +47,8 @@ if [ ! -f "$DIR_TO_ZIP/appspec.yml" ]; then
     exit 1;
 fi
 
+echo "::debug::Zip directory located (with appspec.yml)."
+
 ZIP_FILENAME=$GITHUB_RUN_ID-$GITHUB_SHA.zip
 
 # This creates a temp file to explode space delimited excluded files
@@ -52,16 +56,22 @@ ZIP_FILENAME=$GITHUB_RUN_ID-$GITHUB_SHA.zip
 EXCLUSION_FILE=$(mktemp /tmp/zip-excluded.XXXXXX)
 echo "$INPUT_EXCLUDED_FILES" | tr ' ' '\n' > "$EXCLUSION_FILE"
 
+echo "::debug::Exclusion file created for files to ignore in Zip Generation."
+
 zip -r --quiet "$ZIP_FILENAME" "$DIR_TO_ZIP" -x "@$EXCLUSION_FILE"
 if [ ! -f "$ZIP_FILENAME" ]; then
     echo "::error::$ZIP_FILENAME was not generated properly (zip generation failed)."
     exit 1;
 fi
 
+echo "::debug::Zip Archive created."
+
 if [ "$(unzip -l "$ZIP_FILENAME" | grep -q appspec.yml)" = "0" ]; then
     echo "::error::$ZIP_FILENAME was not generated properly (missing appspec.yml)."
     exit 1;
 fi
+
+echo "::debug::Zip Archived validated."
 
 # 3) Upload the deployment to S3, drop old archive.
 function getArchiveETag() {
@@ -72,9 +82,16 @@ function getArchiveETag() {
 }
 
 aws s3 cp "$ZIP_FILENAME" s3://"$INPUT_S3_BUCKET"/"$INPUT_S3_FOLDER"/"$ZIP_FILENAME" > /dev/null 2>&1
+
+echo "::debug::Zip uploaded to S3."
+
 ZIP_ETAG=$(getArchiveETag)
 
+echo "::debug::Obtained ETag of uploaded S3 Zip Archive."
+
 rm "$ZIP_FILENAME"
+
+echo "::debug::Removed old local ZIP Archive."
 
 # 4) Start the CodeDeploy
 function getActiveDeployments() {
