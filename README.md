@@ -24,6 +24,7 @@ Laravel (All Properties) Example
     s3_folder: production
     excluded_files: '.git/* .env storage/framework/cache/* node_modules/*'
     max_polling_iterations: 60
+    directory: ./
 ```
 
 Laravel (Only Required) Example
@@ -57,6 +58,7 @@ Following inputs can be used as `step.with` keys
 | `s3_bucket` | Yes | String | S3 Bucket for archive to be uploaded. |
 | `s3_folder` | Yes | String | S3 Folder for archive to be uploaded within bucket. |
 | `excluded_files` | No | String | Space delimited list of patterns to exclude from archive |
+| `directory` | No | String | Directory to archive. Defaults to root of project. |
 | `max_polling_iterations` | No | Number | Number of 15s iterations to poll max. (default: `60`) |
 
 ## IAM Permissions

@@ -58,7 +58,11 @@ echo "$INPUT_EXCLUDED_FILES" | tr ' ' '\n' > "$EXCLUSION_FILE"
 
 echo "::debug::Exclusion file created for files to ignore in Zip Generation."
 
-zip -r --quiet "$ZIP_FILENAME" "$DIR_TO_ZIP" -x "@$EXCLUSION_FILE"
+if [ -n "$DIR_TO_ZIP" ]; then
+    cd "$DIR_TO_ZIP";
+fi
+
+zip -r --quiet "$ZIP_FILENAME" . -x "@$EXCLUSION_FILE"
 if [ ! -f "$ZIP_FILENAME" ]; then
     echo "::error::$ZIP_FILENAME was not generated properly (zip generation failed)."
     exit 1;
