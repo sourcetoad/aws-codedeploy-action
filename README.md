@@ -1,12 +1,15 @@
 # AWS CodeDeploy Action
+
 To automatically deploy applications to EC2 via CodeDeploy.
 
 ---
 
 ## Usage
+
 The best example is just a snippet of the workflow with all options.
 
 Laravel (All Properties) Example
+
 ```yaml
 - name: AWS CodeDeploy
   uses: sourcetoad/aws-codedeploy-action@v1
@@ -24,6 +27,7 @@ Laravel (All Properties) Example
 ```
 
 Laravel (Only Required) Example
+
 ```yaml
 - name: AWS CodeDeploy
   uses: sourcetoad/aws-codedeploy-action@v1
@@ -37,6 +41,7 @@ Laravel (Only Required) Example
 ```
 
 ## Customizing
+
 ### inputs
 
 Following inputs can be used as `step.with` keys
@@ -55,33 +60,44 @@ Following inputs can be used as `step.with` keys
 | `max_polling_iterations` | No | Number | Number of 15s iterations to poll max. (default: `60`) |
 
 ## IAM Permissions
+
 You shouldn't be using a root user. Below is a snippet of an inline policy with perfect permissions for action.
 
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "s3:Get*",
-                "s3:List*",
-                "s3:PutObject",
-                "s3:ListMultipartUploadParts",
-                "s3:AbortMultipartUpload"
-            ],
-            "Resource": [
-                "arn:aws:s3:::project-codedeploy/*"
-            ]
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:Get*",
+        "s3:List*",
+        "s3:PutObject",
+        "s3:ListMultipartUploadParts",
+        "s3:AbortMultipartUpload"
+      ],
+      "Resource": [
+        "arn:aws:s3:::project-codedeploy/*"
+      ]
+    }
+  ]
 }
 ```
 
 ---
-### Install as Local Action
-For quicker troubleshooting cycles, the action can be copied directly into another project. This way, changes to the action and it's usage can happen simultaneously, in one commit.
 
-1. Copy this repository into your other project as `.github/actions/aws-codedeploy-action`. Be careful: simply cloning in place will likely install it as a submodule--make sure to copy the files without `.git`
-2. In your other project's workflow, in the action step, set\
+### Install as Local Action
+
+For quicker troubleshooting cycles, the action can be copied directly into another project. This way, changes to the
+action, and its usage can happen simultaneously in one commit.
+
+1. Copy this repository into your other project as `.github/actions/aws-codedeploy-action`. Be careful: simply cloning
+   in place will likely install it as a submodule--make sure to copy the files without `.git`
+    1. As a single command:
+       ```shell
+       mkdir .github/actions && \
+       git clone --depth=1 --branch=master git@github.com:sourcetoad/aws-codedeploy-action.git .github/actions/aws-codedeploy-action && \
+       rm -rf .github/actions/aws-codedeploy-action/.git
+       ```
+2. In your other project's workflow, in the action step, set
    `uses: ./.github/actions/aws-codedeploy-action`
