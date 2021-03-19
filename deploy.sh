@@ -85,7 +85,7 @@ function getArchiveETag() {
      --query ETag --output text
 }
 
-aws s3 cp "$ZIP_FILENAME" s3://"$INPUT_S3_BUCKET"/"$INPUT_S3_FOLDER"/"$ZIP_FILENAME" > /dev/null 2>&1
+aws s3 cp "$ZIP_FILENAME" s3://"$INPUT_S3_BUCKET"/"$INPUT_S3_FOLDER"/"$ZIP_FILENAME"
 
 echo "::debug::Zip uploaded to S3."
 
