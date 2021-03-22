@@ -63,7 +63,10 @@ Following inputs can be used as `step.with` keys
 
 ## IAM Permissions
 
-You shouldn't be using a root user. Below is a snippet of an inline policy with perfect permissions for action.
+You shouldn't be using a root user. Below are snippets of an inline policies with suggested permissions for the action. 
+
+ * You might need to adapt these to fit your use case.
+ * You will need to insert proper resources/arns to make the snippets below valid.
 
 ```json
 {
@@ -85,6 +88,40 @@ You shouldn't be using a root user. Below is a snippet of an inline policy with 
   ]
 }
 ```
+
+ * This restrict the action to uploading an object and listing/getting the object so it can obtain the location for CodeDeploy
+ * It is restricted to a specific bucket.
+
+For deploying via CodeDeploy you will need another set of permissions.
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "codedeploy:CreateDeployment"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:codedeploy:codedeploy-arn"
+            ]
+        },
+        {
+            "Action": [
+                "codedeploy:Batch*",
+                "codedeploy:Get*",
+                "codedeploy:List*",
+                "codedeploy:RegisterApplicationRevision"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+ * These permissions are a rough example of allowing the user to list/get/register a revision for all
+ * A specific permission statement exists to lock creating the deployment to a specific resource
 
 ---
 
