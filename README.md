@@ -66,7 +66,7 @@ Following inputs can be used as `step.with` keys
 You shouldn't be using a root user. Below are snippets of an inline policies with suggested permissions for the action. 
 
  * You might need to adapt these to fit your use case.
- * You will need to insert proper resources/arns to make the snippets below valid.
+ * You will need to insert proper resources/ARNs to make the snippets below valid.
 
 ```json
 {
@@ -89,7 +89,7 @@ You shouldn't be using a root user. Below are snippets of an inline policies wit
 }
 ```
 
- * This restrict the action to uploading an object and listing/getting the object so it can obtain the location for CodeDeploy
+ * This restricts the action to uploading an object and listing/getting the object so it can obtain the location for CodeDeploy
  * It is restricted to a specific bucket.
 
 For deploying via CodeDeploy you will need another set of permissions.
@@ -120,7 +120,7 @@ For deploying via CodeDeploy you will need another set of permissions.
 }
 ```
 
- * These permissions are a rough example of allowing the user to list/get/register a revision for all
+ * These permissions are a rough example of allowing the user to list/get/register a revision for all resources
  * A specific permission statement exists to lock creating the deployment to a specific resource
 
 ---
