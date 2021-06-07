@@ -59,7 +59,16 @@ Following inputs can be used as `step.with` keys
 | `s3_folder` | Yes | String | S3 Folder for archive to be uploaded within bucket. |
 | `excluded_files` | No | String | Space delimited list of patterns to exclude from archive |
 | `directory` | No | String | Directory to archive. Defaults to root of project. |
+| `archive` | No | String | Zip to deploy. Defaults to empty (thus ignored) |
 | `max_polling_iterations` | No | Number | Number of 15s iterations to poll max. (default: `60`) |
+
+## Archive or Build
+Some projects may have a complex build system or even build the archive in a previous step. This is where
+`directory` and `archive` come into play:
+
+ * By default, `directory` will be used to zip that directory and deployed.
+ * If `archive` is non-empty, it will be used in place of `directory`
+ * `archive` must zip filename including extension.
 
 ## IAM Permissions
 
