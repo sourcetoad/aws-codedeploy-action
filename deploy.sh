@@ -76,6 +76,7 @@ if [ "$(unzip -l "$ZIP_FILENAME" | grep -q appspec.yml)" = "0" ]; then
 fi
 
 echo "::debug::Zip Archived validated."
+echo "::set-output name=zip_filename::$ZIP_FILENAME"
 
 # 3) Upload the deployment to S3, drop old archive.
 function getArchiveETag() {
@@ -92,6 +93,7 @@ echo "::debug::Zip uploaded to S3."
 ZIP_ETAG=$(getArchiveETag)
 
 echo "::debug::Obtained ETag of uploaded S3 Zip Archive."
+echo "::set-output name=etag::$ZIP_ETAG"
 
 rm "$ZIP_FILENAME"
 
