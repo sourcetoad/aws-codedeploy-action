@@ -68,7 +68,7 @@ Some projects may have a complex build system or even build the archive in a pre
 
  * By default, `directory` will be used to zip that directory and deployed.
  * If `archive` is non-empty, it will be used in place of `directory`
- * `archive` must zip filename including extension.
+ * `archive` must be zip filename including extension (ie `prod-backend-20220202.zip`).
 
 ## IAM Permissions
 
