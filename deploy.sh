@@ -40,35 +40,42 @@ export AWS_ACCESS_KEY_ID=$INPUT_AWS_ACCESS_KEY
 export AWS_SECRET_ACCESS_KEY=$INPUT_AWS_SECRET_KEY
 export AWS_DEFAULT_REGION=$INPUT_AWS_REGION
 
-# 2) Zip up the package
-DIR_TO_ZIP="./$INPUT_DIRECTORY"
-if [ ! -f "$DIR_TO_ZIP/appspec.yml" ]; then
-    echo "::error::appspec.yml was not located at: $DIR_TO_ZIP"
-    exit 1;
+# 2) Zip up the package, if no archive given
+if [ -z "$INPUT_ARCHIVE" ]; then
+
+    DIR_TO_ZIP="./$INPUT_DIRECTORY"
+    if [ ! -f "$DIR_TO_ZIP/appspec.yml" ]; then
+        echo "::error::appspec.yml was not located at: $DIR_TO_ZIP"
+        exit 1;
+    fi
+
+    echo "::debug::Zip directory located (with appspec.yml)."
+
+    ZIP_FILENAME=$GITHUB_RUN_ID-$GITHUB_SHA.zip
+
+    # This creates a temp file to explode space delimited excluded files
+    # into newline delimited exclusions passed to "-x" on the zip command.
+    EXCLUSION_FILE=$(mktemp /tmp/zip-excluded.XXXXXX)
+    echo "$INPUT_EXCLUDED_FILES" | tr ' ' '\n' > "$EXCLUSION_FILE"
+
+    echo "::debug::Exclusion file created for files to ignore in Zip Generation."
+
+    if [ -n "$DIR_TO_ZIP" ]; then
+        cd "$DIR_TO_ZIP";
+    fi
+
+    zip -r --quiet "$ZIP_FILENAME" . -x "@$EXCLUSION_FILE"
+    if [ ! -f "$ZIP_FILENAME" ]; then
+        echo "::error::$ZIP_FILENAME was not generated properly (zip generation failed)."
+        exit 1;
+    fi
+
+    echo "::debug::Zip Archive created."
+else
+    echo "::error::$INPUT_ARCHIVE being using as zip filename. Skipping generation of ZIP."
+    ZIP_FILENAME="$INPUT_ARCHIVE"
 fi
 
-echo "::debug::Zip directory located (with appspec.yml)."
-
-ZIP_FILENAME=$GITHUB_RUN_ID-$GITHUB_SHA.zip
-
-# This creates a temp file to explode space delimited excluded files
-# into newline delimited exclusions passed to "-x" on the zip command.
-EXCLUSION_FILE=$(mktemp /tmp/zip-excluded.XXXXXX)
-echo "$INPUT_EXCLUDED_FILES" | tr ' ' '\n' > "$EXCLUSION_FILE"
-
-echo "::debug::Exclusion file created for files to ignore in Zip Generation."
-
-if [ -n "$DIR_TO_ZIP" ]; then
-    cd "$DIR_TO_ZIP";
-fi
-
-zip -r --quiet "$ZIP_FILENAME" . -x "@$EXCLUSION_FILE"
-if [ ! -f "$ZIP_FILENAME" ]; then
-    echo "::error::$ZIP_FILENAME was not generated properly (zip generation failed)."
-    exit 1;
-fi
-
-echo "::debug::Zip Archive created."
 
 if [ "$(unzip -l "$ZIP_FILENAME" | grep -q appspec.yml)" = "0" ]; then
     echo "::error::$ZIP_FILENAME was not generated properly (missing appspec.yml)."
