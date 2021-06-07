@@ -25,6 +25,9 @@ inputs:
   directory:
     description: 'Directory to be archived instead of entire workspace.'
     required: false
+  archive:
+    description: 'Zip to be used for deployment, instead of archiving a directory.'
+    required: false
   excluded_files:
     description: 'Files to be excluded during archiving (space delimited).'
     required: false
