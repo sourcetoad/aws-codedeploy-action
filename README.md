@@ -61,6 +61,7 @@ Following inputs can be used as `step.with` keys
 | `directory` | No | String | Directory to archive. Defaults to root of project. |
 | `archive` | No | String | Zip to deploy. Defaults to empty (thus ignored) |
 | `max_polling_iterations` | No | Number | Number of 15s iterations to poll max. (default: `60`) |
+| `dry_run` | No | Boolean | If true, no connection to AWS is made. Just local zip creation. |
 
 ## Archive or Build
 Some projects may have a complex build system or even build the archive in a previous step. This is where
