@@ -45,6 +45,10 @@ inputs:
     description: 'Max amount of iterations (15s increments) to wait for a deployment'
     required: false
     default: '60'
+  dry_run:
+    description: 'Whether to skip all AWS related steps.'
+    required: false
+    default: 'false'
 runs:
     using: 'docker'
     image: 'Dockerfile'
