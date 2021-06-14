@@ -1,4 +1,4 @@
-#!/bin/sh -l
+#!/bin/bash
 
 # Empty secure environments
 export AWS_ACCESS_KEY_ID=''
