@@ -72,7 +72,7 @@ if [ -z "$INPUT_ARCHIVE" ]; then
 
     echo "::debug::Zip Archive created."
 else
-    echo "::error::$INPUT_ARCHIVE being using as zip filename. Skipping generation of ZIP."
+    echo "::debug::$INPUT_ARCHIVE being using as zip filename. Skipping generation of ZIP."
     ZIP_FILENAME="$INPUT_ARCHIVE"
 fi
 
