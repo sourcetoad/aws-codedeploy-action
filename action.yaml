@@ -45,6 +45,11 @@ inputs:
     description: 'Max amount of iterations (15s increments) to wait for a deployment'
     required: false
     default: '60'
+outputs:
+  zip_filename:
+    description: 'Filename of generated zip file.'
+  etag:
+    description: 'ETag for the generated zip file reported by AWS.'
 runs:
     using: 'docker'
     image: 'Dockerfile'
