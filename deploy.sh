@@ -8,27 +8,27 @@ ORANGE='\033[0;33m'
 BLUE='\033[0;34m'
 
 # 0) Validation
-if [ -z "$INPUT_CODEDEPLOY_NAME" ]; then
+if [ -z "$INPUT_CODEDEPLOY_NAME" ] && [ -z "$INPUT_DRY_RUN" ]; then
     echo "::error::codedeploy_name is required and must not be empty."
     exit 1;
 fi
 
-if [ -z "$INPUT_CODEDEPLOY_GROUP" ]; then
+if [ -z "$INPUT_CODEDEPLOY_GROUP" ] && [ -z "$INPUT_DRY_RUN" ]; then
     echo "::error::codedeploy_group is required and must not be empty."
     exit 1;
 fi
 
-if [ -z "$INPUT_AWS_ACCESS_KEY" ]; then
+if [ -z "$INPUT_AWS_ACCESS_KEY" ] && [ -z "$INPUT_DRY_RUN" ]; then
     echo "::error::aws_access_key is required and must not be empty."
     exit 1;
 fi
 
-if [ -z "$INPUT_AWS_SECRET_KEY" ]; then
+if [ -z "$INPUT_AWS_SECRET_KEY" ] && [ -z "$INPUT_DRY_RUN" ]; then
     echo "::error::aws_secret_key is required and must not be empty."
     exit 1;
 fi
 
-if [ -z "$INPUT_S3_BUCKET" ]; then
+if [ -z "$INPUT_S3_BUCKET" ] && [ -z "$INPUT_DRY_RUN" ]; then
     echo "::error::s3_bucket is required and must not be empty."
     exit 1;
 fi
@@ -92,6 +92,11 @@ function getArchiveETag() {
      --key "$INPUT_S3_FOLDER"/"$ZIP_FILENAME" \
      --query ETag --output text
 }
+
+if "$INPUT_DRY_RUN"; then
+    echo "::debug::Dry Run detected. Exiting."
+    exit 0;
+fi
 
 aws s3 cp "$ZIP_FILENAME" s3://"$INPUT_S3_BUCKET"/"$INPUT_S3_FOLDER"/"$ZIP_FILENAME"
 
