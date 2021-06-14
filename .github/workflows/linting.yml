@@ -11,4 +11,4 @@ jobs:
       - name: Lint Bash
         uses: azohra/shell-linter@latest
         with:
-          path: 'cleanup.sh,deploy.sh'
+          path: '*.sh'
