@@ -49,6 +49,11 @@ inputs:
     description: 'Whether to skip all AWS related steps.'
     required: false
     default: 'false'
+outputs:
+  zip_filename:
+    description: 'Filename of generated zip file.'
+  etag:
+    description: 'ETag for the generated zip file reported by AWS.'
 runs:
     using: 'docker'
     image: 'Dockerfile'
