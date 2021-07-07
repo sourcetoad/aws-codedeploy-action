@@ -197,6 +197,9 @@ if $INPUT_CODEDEPLOY_REGISTER_ONLY; then
     registerRevision
     echo -e "${BLUE}Registered deployment to ${RESET_TEXT}$INPUT_CODEDEPLOY_GROUP!";
 else
+    echo -e "${BLUE}Registering deployment to ${RESET_TEXT}$INPUT_CODEDEPLOY_GROUP.";
+    registerRevision
+    echo -e "${BLUE}Registered deployment to ${RESET_TEXT}$INPUT_CODEDEPLOY_GROUP!";
     echo -e "${BLUE}Deploying to ${RESET_TEXT}$INPUT_CODEDEPLOY_GROUP.";
     DEPLOYMENT_ID=$(deployRevision)
 
