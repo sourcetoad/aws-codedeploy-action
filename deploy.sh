@@ -207,5 +207,5 @@ else
     pollForSpecificDeployment "$DEPLOYMENT_ID"
     echo -e "${GREEN}Deployed to ${RESET_TEXT}$INPUT_CODEDEPLOY_GROUP!";
 fi
-    echo -e "${GREEN}Latest eTag: ${RESET_TEXT}$ZIP_ETAG!"
+    echo -e "${GREEN}Latest eTag: ${RESET_TEXT}$ZIP_ETAG"
 exit 0;
