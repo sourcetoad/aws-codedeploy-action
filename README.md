@@ -59,6 +59,7 @@ Following inputs can be used as `step.with` keys
 | `s3_folder` | Yes | String | S3 Folder for archive to be uploaded within bucket. |
 | `excluded_files` | No | String | Space delimited list of patterns to exclude from archive |
 | `directory` | No | String | Directory to archive. Defaults to root of project. |
+| `custom_zip_flags` | No | String | Flags to pass to `zip` command. (ie `zip "$FLAGS" ...`) |
 | `archive` | No | String | Zip to deploy. Defaults to empty (thus ignored) |
 | `max_polling_iterations` | No | Number | Number of 15s iterations to poll max. (default: `60`) |
 | `dry_run` | No | Boolean | If true, no connection to AWS is made. Just local zip creation. |
