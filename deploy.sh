@@ -64,7 +64,8 @@ if [ -z "$INPUT_ARCHIVE" ]; then
         cd "$DIR_TO_ZIP";
     fi
 
-    zip "$INPUT_CUSTOM_ZIP_FLAGS" -r --quiet "$ZIP_FILENAME" . -x "@$EXCLUSION_FILE"
+    # shellcheck disable=SC2086
+    zip $INPUT_CUSTOM_ZIP_FLAGS -r --quiet "$ZIP_FILENAME" . -x "@$EXCLUSION_FILE"
     if [ ! -f "$ZIP_FILENAME" ]; then
         echo "::error::$ZIP_FILENAME was not generated properly (zip generation failed)."
         exit 1;
