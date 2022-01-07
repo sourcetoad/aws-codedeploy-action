@@ -29,7 +29,15 @@ Laravel (All Properties) Example
 
 Laravel (Only Required) Example
 
+* This leverages the official [GitHub Action for AWS Credentials](https://github.com/marketplace/actions/configure-aws-credentials-action-for-github-actions)
+
 ```yaml
+- name: Configure AWS Credentials
+  uses: aws-actions/configure-aws-credentials@v1
+  with:
+    role-to-assume: arn:aws:iam::123456789100:role/my-github-actions-role
+    aws-region: us-east-2
+
 - name: AWS CodeDeploy
   uses: sourcetoad/aws-codedeploy-action@v1
   with:
