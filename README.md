@@ -41,8 +41,6 @@ Laravel (Only Required) Example
 - name: AWS CodeDeploy
   uses: sourcetoad/aws-codedeploy-action@v1
   with:
-    aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
-    aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
     codedeploy_name: project
     codedeploy_group: prod
     s3_bucket: project-codedeploy
