@@ -47,6 +47,14 @@ Laravel (Only Required) Example
     s3_folder: production
 ```
 
+* Remember to set specific permissions so we can communicate with the GitHub OIDC Endpoint.
+
+```
+permissions:
+    id-token: write
+    contents: read
+```
+
 ## Customizing
 
 ### inputs
@@ -79,6 +87,7 @@ Some projects may have a complex build system or even build the archive in a pre
  * `archive` must be zip filename including extension (ie `prod-backend-20220202.zip`).
 
 ## IAM Permissions
+_If using manual Access/Secret keys_
 
 You shouldn't be using a root user. Below are snippets of an inline policies with suggested permissions for the action. 
 
