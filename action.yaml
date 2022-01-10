@@ -7,11 +7,11 @@ branding:
 
 inputs:
   aws_access_key:
-    description: 'AWS Access Key'
-    required: true
+    description: 'AWS Access Key (Required if no aws-actions/configure-aws-credentials)'
+    required: false
   aws_secret_key:
-    description: 'AWS Secret Key'
-    required: true
+    description: 'AWS Secret Key (Required if no aws-actions/configure-aws-credentials)'
+    required: false
   aws_region:
     description: 'AWS Region'
     required: false

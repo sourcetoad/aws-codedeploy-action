@@ -29,16 +29,30 @@ Laravel (All Properties) Example
 
 Laravel (Only Required) Example
 
+* This leverages the official [GitHub Action for AWS Credentials](https://github.com/marketplace/actions/configure-aws-credentials-action-for-github-actions)
+
 ```yaml
+- name: Configure AWS Credentials
+  uses: aws-actions/configure-aws-credentials@v1
+  with:
+    role-to-assume: arn:aws:iam::123456789100:role/my-github-actions-role
+    aws-region: us-east-2
+
 - name: AWS CodeDeploy
   uses: sourcetoad/aws-codedeploy-action@v1
   with:
-    aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
-    aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
     codedeploy_name: project
     codedeploy_group: prod
     s3_bucket: project-codedeploy
     s3_folder: production
+```
+
+* Remember to set specific permissions so we can communicate with the GitHub OIDC Endpoint.
+
+```
+permissions:
+    id-token: write
+    contents: read
 ```
 
 ## Customizing
@@ -47,22 +61,22 @@ Laravel (Only Required) Example
 
 Following inputs can be used as `step.with` keys
 
-| Name             | Required | Type    | Description                        |
-|------------------|----------|---------|------------------------------------|
-| `aws_access_key` | Yes | String | IAM Access Key. |
-| `aws_secret_key` | Yes | String | IAM Secret Key. |
-| `aws_region` | No | String | AWS Region (default: `us-east-1`). |
-| `codedeploy_name` | Yes | String | CodeDeploy Project Name. |
-| `codedeploy_group` | Yes | String | CodeDeploy Project Group. |
-| `codedeploy_register_only` | No | Boolean | If true, revision is registered not deployed. |
-| `s3_bucket` | Yes | String | S3 Bucket for archive to be uploaded. |
-| `s3_folder` | Yes | String | S3 Folder for archive to be uploaded within bucket. |
-| `excluded_files` | No | String | Space delimited list of patterns to exclude from archive |
-| `directory` | No | String | Directory to archive. Defaults to root of project. |
-| `custom_zip_flags` | No | String | Flags to pass to `zip` command. (ie `zip "$FLAGS" ...`) |
-| `archive` | No | String | Zip to deploy. Defaults to empty (thus ignored) |
-| `max_polling_iterations` | No | Number | Number of 15s iterations to poll max. (default: `60`) |
-| `dry_run` | No | Boolean | If true, no connection to AWS is made. Just local zip creation. |
+| Name                       | Required | Type    | Description                                                     |
+|----------------------------|----------|---------|-----------------------------------------------------------------|
+| `aws_access_key`           | No       | String  | IAM Access Key.                                                 |
+| `aws_secret_key`           | No       | String  | IAM Secret Key.                                                 |
+| `aws_region`               | No       | String  | AWS Region (default: `us-east-1`).                              |
+| `codedeploy_name`          | Yes      | String  | CodeDeploy Project Name.                                        |
+| `codedeploy_group`         | Yes      | String  | CodeDeploy Project Group.                                       |
+| `codedeploy_register_only` | No       | Boolean | If true, revision is registered not deployed.                   |
+| `s3_bucket`                | Yes      | String  | S3 Bucket for archive to be uploaded.                           |
+| `s3_folder`                | Yes      | String  | S3 Folder for archive to be uploaded within bucket.             |
+| `excluded_files`           | No       | String  | Space delimited list of patterns to exclude from archive        |
+| `directory`                | No       | String  | Directory to archive. Defaults to root of project.              |
+| `custom_zip_flags`         | No       | String  | Flags to pass to `zip` command. (ie `zip "$FLAGS" ...`)         |
+| `archive`                  | No       | String  | Zip to deploy. Defaults to empty (thus ignored)                 |
+| `max_polling_iterations`   | No       | Number  | Number of 15s iterations to poll max. (default: `60`)           |
+| `dry_run`                  | No       | Boolean | If true, no connection to AWS is made. Just local zip creation. |
 
 ## Archive or Build
 Some projects may have a complex build system or even build the archive in a previous step. This is where
@@ -73,6 +87,7 @@ Some projects may have a complex build system or even build the archive in a pre
  * `archive` must be zip filename including extension (ie `prod-backend-20220202.zip`).
 
 ## IAM Permissions
+_If using manual Access/Secret keys_
 
 You shouldn't be using a root user. Below are snippets of an inline policies with suggested permissions for the action. 
 

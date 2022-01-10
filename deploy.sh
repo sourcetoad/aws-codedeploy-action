@@ -18,16 +18,6 @@ if [ -z "$INPUT_CODEDEPLOY_GROUP" ] && [ -z "$INPUT_DRY_RUN" ]; then
     exit 1;
 fi
 
-if [ -z "$INPUT_AWS_ACCESS_KEY" ] && [ -z "$INPUT_DRY_RUN" ]; then
-    echo "::error::aws_access_key is required and must not be empty."
-    exit 1;
-fi
-
-if [ -z "$INPUT_AWS_SECRET_KEY" ] && [ -z "$INPUT_DRY_RUN" ]; then
-    echo "::error::aws_secret_key is required and must not be empty."
-    exit 1;
-fi
-
 if [ -z "$INPUT_S3_BUCKET" ] && [ -z "$INPUT_DRY_RUN" ]; then
     echo "::error::s3_bucket is required and must not be empty."
     exit 1;
@@ -35,10 +25,25 @@ fi
 
 echo "::debug::Input variables correctly validated."
 
+# 0.5) Validation of AWS Creds
+AWS_USERID=$(aws sts get-caller-identity | jq -r '.UserId')
+if [ -z "$AWS_USERID" ]; then
+    echo "::error::Access could not be reached to AWS. Double check aws-actions/configure-aws-credentials or aws_access_key/aws_secret_key."
+    exit 1;
+fi
+
 # 1) Load our permissions in for aws-cli
-export AWS_ACCESS_KEY_ID=$INPUT_AWS_ACCESS_KEY
-export AWS_SECRET_ACCESS_KEY=$INPUT_AWS_SECRET_KEY
-export AWS_DEFAULT_REGION=$INPUT_AWS_REGION
+if [ -n "$INPUT_AWS_ACCESS_KEY" ]; then
+    export AWS_ACCESS_KEY_ID=$INPUT_AWS_ACCESS_KEY
+fi
+
+if [ -n "$INPUT_AWS_SECRET_KEY" ]; then
+    export AWS_SECRET_ACCESS_KEY=$INPUT_AWS_SECRET_KEY
+fi
+
+if [ -n "$INPUT_AWS_REGION" ]; then
+    export AWS_DEFAULT_REGION=$INPUT_AWS_REGION
+fi
 
 # 2) Zip up the package, if no archive given
 if [ -z "$INPUT_ARCHIVE" ]; then
