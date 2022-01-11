@@ -27,7 +27,7 @@ echo "::debug::Input variables correctly validated."
 
 # 0.5) Validation of AWS Creds
 AWS_USERID=$(aws sts get-caller-identity | jq -r '.UserId')
-if [ -z "$AWS_USERID" ]; then
+if [ -z "$AWS_USERID" ] && [ -z "$INPUT_DRY_RUN" ]; then
     echo "::error::Access could not be reached to AWS. Double check aws-actions/configure-aws-credentials or aws_access_key/aws_secret_key."
     exit 1;
 fi
