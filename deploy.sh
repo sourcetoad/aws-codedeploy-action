@@ -206,9 +206,13 @@ else
     echo -e "${BLUE}Deploying to ${RESET_TEXT}$INPUT_CODEDEPLOY_GROUP.";
     DEPLOYMENT_ID=$(deployRevision)
 
-    sleep 10;
-    pollForSpecificDeployment "$DEPLOYMENT_ID"
-    echo -e "${GREEN}Deployed to ${RESET_TEXT}$INPUT_CODEDEPLOY_GROUP!";
+    if [ "$INPUT_MAX_POLLING_ITERATIONS" -eq "0" ]; then
+        echo "${BLUE}Iterations at 0. GitHub Action ending, but deployment in-progress to: ${RESET_TEXT}$INPUT_CODEDEPLOY_GROUP.";
+    else
+        sleep 10;
+        pollForSpecificDeployment "$DEPLOYMENT_ID"
+        echo -e "${GREEN}Deployed to ${RESET_TEXT}$INPUT_CODEDEPLOY_GROUP!";
+    fi
 fi
 
 exit 0;
