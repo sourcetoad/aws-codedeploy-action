@@ -49,7 +49,7 @@ Laravel (Only Required) Example
 
 * Remember to set specific permissions so we can communicate with the GitHub OIDC Endpoint.
 
-```
+```yaml
 permissions:
     id-token: write
     contents: read
