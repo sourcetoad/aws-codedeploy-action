@@ -1,4 +1,4 @@
-FROM amazon/aws-cli:2.7.2
+FROM amazon/aws-cli:2.7.25
 
 # Move files in for deployment & cleanup
 COPY deploy.sh /deploy.sh
