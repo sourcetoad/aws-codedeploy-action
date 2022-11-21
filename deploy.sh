@@ -119,10 +119,12 @@ echo "::debug::Removed old local ZIP Archive."
 
 # 4) Start the CodeDeploy
 function getActiveDeployments() {
-    aws deploy list-deployments \
+    if ! aws deploy list-deployments \
         --application-name "$INPUT_CODEDEPLOY_NAME" \
         --deployment-group-name "$INPUT_CODEDEPLOY_GROUP" \
-        --include-only-statuses "Queued" "InProgress" |  jq -r '.deployments';
+        --include-only-statuses "Queued" "InProgress" |  jq -r '.deployments'; then
+        exit 1;
+    fi
 }
 
 function getSpecificDeployment() {
