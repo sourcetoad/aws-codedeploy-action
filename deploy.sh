@@ -123,6 +123,7 @@ function getActiveDeployments() {
         --application-name "$INPUT_CODEDEPLOY_NAME" \
         --deployment-group-name "$INPUT_CODEDEPLOY_GROUP" \
         --include-only-statuses "Queued" "InProgress" |  jq -r '.deployments'; then
+        echo -e "${RED}Failed deployment detected (Failed ListDeployments see error above)."
         exit 1;
     fi
 }
