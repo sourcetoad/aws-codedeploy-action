@@ -82,10 +82,29 @@ else
     ZIP_FILENAME="$INPUT_ARCHIVE"
 fi
 
+if [ -z "$ARCHIVE_TYPE" ]; then
+    case "$ZIP_FILENAME" in
+        *.tar)
+        *.tar.gz)
+            ARCHIVE_TYPE=tarball
+            ;;
+        *)
+            # assume it's a zipfile
+            ARCHIVE_TYPE=zipfile
+            ;;
+    ecas
+fi
 
-if [ "$(unzip -l "$ZIP_FILENAME" | grep -q appspec.yml)" = "0" ]; then
-    echo "::error::$ZIP_FILENAME was not generated properly (missing appspec.yml)."
-    exit 1;
+if [ $ARCHIVE_TYPE == 'zipfile' ]; then
+    if [ "$(unzip -l "$ZIP_FILENAME" | grep -q appspec.yml)" = "0" ]; then
+        echo "::error::$ZIP_FILENAME was not generated properly (missing appspec.yml)."
+        exit 1;
+    fi
+else
+    if [ "$(tar -tf "$ZIP_FILENAME" | grep -qv appspec.yml)" ]; then
+        echo "::error::$ZIP_FILENAME was not generated properly (missing appspec.yml)."
+        exit 1;
+    fi
 fi
 
 echo "::debug::Zip Archived validated."
