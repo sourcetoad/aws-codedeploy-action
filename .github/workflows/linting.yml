@@ -1,5 +1,7 @@
 name: sourcetoad/aws-codedeploy-action
-on: push
+on:
+  push:
+  pull_request:
 
 jobs:
   bash-lint:
