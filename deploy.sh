@@ -82,20 +82,22 @@ else
     ZIP_FILENAME="$INPUT_ARCHIVE"
 fi
 
-if [ -z "$ARCHIVE_TYPE" ]; then
+if [ -z "$BUNDLE_TYPE" ]; then
+    # permitted values for BUNDLE_TYPE can be found here: https://docs.aws.amazon.com/codedeploy/latest/userguide/application-revisions-register.html#application-revisions-register-s3
     case "$ZIP_FILENAME" in
         *.tar)
+            BUNDLE_TYPE=tar
         *.tar.gz)
-            ARCHIVE_TYPE=tarball
+            BUNDLE_TYPE=tgz
             ;;
         *)
             # assume it's a zipfile
-            ARCHIVE_TYPE=zipfile
+            BUNDLE_TYPE=zip
             ;;
     ecas
 fi
 
-if [ $ARCHIVE_TYPE == 'zipfile' ]; then
+if [ $BUNDLE_TYPE == 'zip' ]; then
     if [ "$(unzip -l "$ZIP_FILENAME" | grep -q appspec.yml)" = "0" ]; then
         echo "::error::$ZIP_FILENAME was not generated properly (missing appspec.yml)."
         exit 1;
@@ -211,14 +213,14 @@ function deployRevision() {
         --application-name "$INPUT_CODEDEPLOY_NAME" \
         --deployment-group-name "$INPUT_CODEDEPLOY_GROUP" \
         --description "$GITHUB_REF - $GITHUB_SHA" \
-        --s3-location bucket="$INPUT_S3_BUCKET",bundleType=zip,eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" | jq -r '.deploymentId'
+        --s3-location bucket="$INPUT_S3_BUCKET",bundleType="$BUNDLE_TYPE",eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" | jq -r '.deploymentId'
 }
 
 function registerRevision() {
     aws deploy register-application-revision \
         --application-name "$INPUT_CODEDEPLOY_NAME" \
         --description "$GITHUB_REF - $GITHUB_SHA" \
-        --s3-location bucket="$INPUT_S3_BUCKET",bundleType=zip,eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" > /dev/null 2>&1
+        --s3-location bucket="$INPUT_S3_BUCKET",bundleType="$BUNDLE_TYPE",eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" > /dev/null 2>&1
 }
 
 if $INPUT_CODEDEPLOY_REGISTER_ONLY; then
