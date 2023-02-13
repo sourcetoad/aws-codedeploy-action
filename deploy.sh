@@ -83,7 +83,7 @@ else
 fi
 
 if [ -z "$BUNDLE_TYPE" ]; then
-    # permitted values for BUNDLE_TYPE can be found here: https://docs.aws.amazon.com/codedeploy/latest/userguide/application-revisions-register.html#application-revisions-register-s3
+    # permitted values for BUNDLE_TYPE can be found here: https://docs.aws.amazon.com/codedeploy/latest/userguide/application-revisions-push.html#push-with-cli
     case "$ZIP_FILENAME" in
         *.tar)
             BUNDLE_TYPE=tar
