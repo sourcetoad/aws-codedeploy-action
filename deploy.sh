@@ -187,16 +187,10 @@ function pollForActiveDeployments() {
 pollForActiveDeployments
 
 # 5) Poll / Complete
-function deployRevision() {
-    EXTRA_ARGS=''
-    if [ -n "$INPUT_CODEDEPLOY_CONFIG_NAME" ]; then
-        EXTRA_ARGS="--deployment-config-name $INPUT_CODEDEPLOY_CONFIG_NAME"
-    fi
-    
-    aws deploy create-deployment \
+function deployRevision() {    
+    aws deploy create-deployment "$@" \
         --application-name "$INPUT_CODEDEPLOY_NAME" \
         --deployment-group-name "$INPUT_CODEDEPLOY_GROUP" \
-        ${EXTRA_ARGS} \
         --description "$GITHUB_REF - $GITHUB_SHA" \
         --s3-location bucket="$INPUT_S3_BUCKET",bundleType=zip,eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" | jq -r '.deploymentId'
 }
@@ -214,7 +208,11 @@ if $INPUT_CODEDEPLOY_REGISTER_ONLY; then
     echo -e "${BLUE}Registered deployment to ${RESET_TEXT}$INPUT_CODEDEPLOY_GROUP!";
 else
     echo -e "${BLUE}Deploying to ${RESET_TEXT}$INPUT_CODEDEPLOY_GROUP.";
-    DEPLOYMENT_ID=$(deployRevision)
+    if [ -n "$INPUT_CODEDEPLOY_CONFIG_NAME" ]; then
+        DEPLOYMENT_ID=$(deployRevision --deployment-config-name "$INPUT_CODEDEPLOY_CONFIG_NAME")
+    else
+        DEPLOYMENT_ID=$(deployRevision)
+    fi
 
     if [ "$INPUT_MAX_POLLING_ITERATIONS" -eq "0" ]; then
         echo -e "${BLUE}Iterations at 0. GitHub Action ending, but deployment in-progress to: ${RESET_TEXT}$INPUT_CODEDEPLOY_GROUP.";
