@@ -188,9 +188,15 @@ pollForActiveDeployments
 
 # 5) Poll / Complete
 function deployRevision() {
+    EXTRA_ARGS=''
+    if [ -n "$INPUT_CODEDEPLOY_CONFIG_NAME" ]; then
+        EXTRA_ARGS="--deployment-config-name $INPUT_CODEDEPLOY_CONFIG_NAME"
+    fi
+    
     aws deploy create-deployment \
         --application-name "$INPUT_CODEDEPLOY_NAME" \
         --deployment-group-name "$INPUT_CODEDEPLOY_GROUP" \
+        ${EXTRA_ARGS} \
         --description "$GITHUB_REF - $GITHUB_SHA" \
         --s3-location bucket="$INPUT_S3_BUCKET",bundleType=zip,eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" | jq -r '.deploymentId'
 }
