@@ -40,6 +40,9 @@ inputs:
   codedeploy_group:
     description: 'AWS CodeDeploy Application Group'
     required: true
+  codedeploy_config_name:
+    description: 'Override the AWS CodeDeploy configuration name'
+    required: false
   codedeploy_register_only:
     description: 'Whether to register the deployment (vs automatic deploy).'
     required: false
