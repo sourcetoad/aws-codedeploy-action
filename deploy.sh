@@ -23,6 +23,18 @@ if [ -z "$INPUT_S3_BUCKET" ] && [ -z "$INPUT_DRY_RUN" ]; then
     exit 1;
 fi
 
+if [ -z "$INPUT_ARCHIVE" ] && [ -n "$INPUT_BUNDLE_TYPE" ]; then
+    echo '::error::bundle_type requires archive to be provided too'
+fi
+
+if [ -n "$INPUT_BUNDLE_TYPE" ] \
+&& [ "$INPUT_BUNDLE_TYPE" !== 'zip' ] \
+&& [ "$INPUT_BUNDLE_TYPE" !== 'tar' ] \
+&& [ "$INPUT_BUNDLE_TYPE" !== 'tgz' ]; then
+    echo '::error::bundle_type must be one of zip, tar or tgz'
+    exit 1;
+fi
+
 echo "::debug::Input variables correctly validated."
 
 # 0.5) Validation of AWS Creds
@@ -82,6 +94,8 @@ else
     ZIP_FILENAME="$INPUT_ARCHIVE"
 fi
 
+BUNDLE_TYPE="$INPUT_BUNDLE_TYPE"
+
 if [ -z "$BUNDLE_TYPE" ]; then
     # permitted values for BUNDLE_TYPE can be found here: https://docs.aws.amazon.com/codedeploy/latest/userguide/application-revisions-push.html#push-with-cli
     case "$ZIP_FILENAME" in
@@ -98,16 +112,20 @@ if [ -z "$BUNDLE_TYPE" ]; then
     ecas
 fi
 
-if [ $BUNDLE_TYPE == 'zip' ]; then
+if [ "$BUNDLE_TYPE" == 'zip' ]; then
     if [ "$(unzip -l "$ZIP_FILENAME" | grep -q appspec.yml)" = "0" ]; then
         echo "::error::$ZIP_FILENAME was not generated properly (missing appspec.yml)."
         exit 1;
     fi
-else
+elif [ "$BUNDLE_TYPE" == 'tar' ] || [ "$BUNDLE_TYPE" == 'tgz' ]; then
     if [ "$(tar -tf "$ZIP_FILENAME" | grep -qv appspec.yml)" ]; then
         echo "::error::$ZIP_FILENAME was not generated properly (missing appspec.yml)."
         exit 1;
     fi
+else
+    # this should be unreachable
+    echo '::error::internal errror (unreachable)'
+    exit 1;
 fi
 
 echo "::debug::Zip Archived validated."
