@@ -104,7 +104,7 @@ if [ "$BUNDLE_TYPE" == 'zip' ]; then
         exit 1;
     fi
 else
-    if [ "$(tar -tf "$ZIP_FILENAME" | grep -qv appspec.yml)" ]; then
+    if tar -tf "$ZIP_FILENAME" | grep -qv appspec.yml; then
         echo "::error::$ZIP_FILENAME was not generated properly (missing appspec.yml)."
         exit 1;
     fi
