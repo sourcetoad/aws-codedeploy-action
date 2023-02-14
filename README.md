@@ -68,6 +68,7 @@ Following inputs can be used as `step.with` keys
 | `aws_region`               | No       | String  | AWS Region (default: `us-east-1`).                              |
 | `codedeploy_name`          | Yes      | String  | CodeDeploy Project Name.                                        |
 | `codedeploy_group`         | Yes      | String  | CodeDeploy Project Group.                                       |
+| `codedeploy_config_name`   | No       | String  | If provided, override the default CodeDeploy Configuration name |
 | `codedeploy_register_only` | No       | Boolean | If true, revision is registered not deployed.                   |
 | `s3_bucket`                | Yes      | String  | S3 Bucket for archive to be uploaded.                           |
 | `s3_folder`                | Yes      | String  | S3 Folder for archive to be uploaded within bucket.             |
