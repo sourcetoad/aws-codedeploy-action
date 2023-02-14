@@ -28,10 +28,6 @@ inputs:
   archive:
     description: 'Zip to be used for deployment, instead of archiving a directory.'
     required: false
-  bundle_type:
-    description: >
-      The type of archive: tar, tgz or zip. By default, the extension will
-      be used to auto-detect this value.
   custom_zip_flags:
     description: 'Custom flags to be passed to zip during archiving.'
     required: false
