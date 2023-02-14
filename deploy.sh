@@ -109,7 +109,7 @@ if [ -z "$BUNDLE_TYPE" ]; then
             # assume it's a zipfile
             BUNDLE_TYPE=zip
             ;;
-    ecas
+    esac
 fi
 
 if [ "$BUNDLE_TYPE" == 'zip' ]; then
