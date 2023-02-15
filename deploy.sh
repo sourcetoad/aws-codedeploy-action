@@ -83,9 +83,31 @@ else
 fi
 
 
-if [ "$(unzip -l "$ZIP_FILENAME" | grep -q appspec.yml)" = "0" ]; then
-    echo "::error::$ZIP_FILENAME was not generated properly (missing appspec.yml)."
-    exit 1;
+BUNDLE_TYPE=''
+# permitted values for BUNDLE_TYPE can be found here: https://docs.aws.amazon.com/codedeploy/latest/userguide/application-revisions-push.html#push-with-cli
+case "$ZIP_FILENAME" in
+    *.tar)
+        BUNDLE_TYPE=tar
+        ;;
+    *.tar.gz)
+        BUNDLE_TYPE=tgz
+        ;;
+    *)
+        # assume it's a zipfile
+        BUNDLE_TYPE=zip
+        ;;
+esac
+
+if [ "$BUNDLE_TYPE" == 'zip' ]; then
+    if [ "$(unzip -l "$ZIP_FILENAME" | grep -q appspec.yml)" = "0" ]; then
+        echo "::error::$ZIP_FILENAME was not generated properly (missing appspec.yml)."
+        exit 1;
+    fi
+else
+    if tar -tf "$ZIP_FILENAME" | grep -qv appspec.yml; then
+        echo "::error::$ZIP_FILENAME was not generated properly (missing appspec.yml)."
+        exit 1;
+    fi
 fi
 
 echo "::debug::Zip Archived validated."
@@ -192,14 +214,14 @@ function deployRevision() {
         --application-name "$INPUT_CODEDEPLOY_NAME" \
         --deployment-group-name "$INPUT_CODEDEPLOY_GROUP" \
         --description "$GITHUB_REF - $GITHUB_SHA" \
-        --s3-location bucket="$INPUT_S3_BUCKET",bundleType=zip,eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" | jq -r '.deploymentId'
+        --s3-location bucket="$INPUT_S3_BUCKET",bundleType="$BUNDLE_TYPE",eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" | jq -r '.deploymentId'
 }
 
 function registerRevision() {
     aws deploy register-application-revision \
         --application-name "$INPUT_CODEDEPLOY_NAME" \
         --description "$GITHUB_REF - $GITHUB_SHA" \
-        --s3-location bucket="$INPUT_S3_BUCKET",bundleType=zip,eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" > /dev/null 2>&1
+        --s3-location bucket="$INPUT_S3_BUCKET",bundleType="$BUNDLE_TYPE",eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" > /dev/null 2>&1
 }
 
 if $INPUT_CODEDEPLOY_REGISTER_ONLY; then
