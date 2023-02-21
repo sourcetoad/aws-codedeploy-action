@@ -1,6 +1,7 @@
 # AWS CodeDeploy Action
+_To automatically deploy applications to EC2 via CodeDeploy._
 
-To automatically deploy applications to EC2 via CodeDeploy.
+![](.github/aws-codedeploy-action.png)
 
 ---
 
@@ -79,7 +80,7 @@ Following inputs can be used as `step.with` keys
 | `max_polling_iterations`   | No       | Number  | Number of 15s iterations to poll max. (default: `60`)           |
 | `dry_run`                  | No       | Boolean | If true, no connection to AWS is made. Just local zip creation. |
 
-## Skipping waiting during deployment
+## Skip waiting during deployment
 Some projects may not want to poll for a completion of a build. Setting `max_polling_iterations` to `0` will exit
 the script after the deployment was kicked off. Progress will have to be monitored elsewhere.
 
@@ -92,7 +93,6 @@ Some projects may have a complex build system or even build the archive in a pre
  * `archive` must be zip filename including extension (ie `prod-backend-20220202.zip`).
 
 ## IAM Permissions
-_If using manual Access/Secret keys_
 
 You shouldn't be using a root user. Below are snippets of an inline policies with suggested permissions for the action. 
 
@@ -153,21 +153,3 @@ For deploying via CodeDeploy you will need another set of permissions.
 
  * These permissions are a rough example of allowing the user to list/get/register a revision for all resources
  * A specific permission statement exists to lock creating the deployment to a specific resource
-
----
-
-### Install as Local Action
-
-For quicker troubleshooting cycles, the action can be copied directly into another project. This way, changes to the
-action, and its usage can happen simultaneously in one commit.
-
-1. Copy this repository into your other project as `.github/actions/aws-codedeploy-action`. Be careful: simply cloning
-   in place will likely install it as a submodule--make sure to copy the files without `.git`
-    1. As a single command:
-       ```shell
-       mkdir .github/actions && \
-       git clone --depth=1 --branch=master git@github.com:sourcetoad/aws-codedeploy-action.git .github/actions/aws-codedeploy-action && \
-       rm -rf .github/actions/aws-codedeploy-action/.git
-       ```
-2. In your other project's workflow, in the action step, set
-   `uses: ./.github/actions/aws-codedeploy-action`
