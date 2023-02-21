@@ -7,6 +7,96 @@ GREEN='\033[0;32m'
 ORANGE='\033[0;33m'
 BLUE='\033[0;34m'
 
+# Functions
+function getArchiveETag() {
+    aws s3api head-object \
+     --bucket "$INPUT_S3_BUCKET" \
+     --key "$INPUT_S3_FOLDER"/"$ZIP_FILENAME" \
+     --query ETag --output text
+}
+
+function deployRevision() {
+    aws deploy create-deployment "$@" \
+        --application-name "$INPUT_CODEDEPLOY_NAME" \
+        --deployment-group-name "$INPUT_CODEDEPLOY_GROUP" \
+        --description "$GITHUB_REF - $GITHUB_SHA" \
+        --s3-location bucket="$INPUT_S3_BUCKET",bundleType="$BUNDLE_TYPE",eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" | jq -r '.deploymentId'
+}
+
+function registerRevision() {
+    aws deploy register-application-revision \
+        --application-name "$INPUT_CODEDEPLOY_NAME" \
+        --description "$GITHUB_REF - $GITHUB_SHA" \
+        --s3-location bucket="$INPUT_S3_BUCKET",bundleType="$BUNDLE_TYPE",eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" > /dev/null 2>&1
+}
+
+function getActiveDeployments() {
+    if ! aws deploy list-deployments \
+        --application-name "$INPUT_CODEDEPLOY_NAME" \
+        --deployment-group-name "$INPUT_CODEDEPLOY_GROUP" \
+        --include-only-statuses "Queued" "InProgress" |  jq -r '.deployments'; then
+        echo -e "${ORANGE}Deployment may still be executing."
+        echo -e "${RED}Failed monitoring deployment (ListDeployments API call failed)."
+        exit 1;
+    fi
+}
+
+function getSpecificDeployment() {
+    aws deploy get-deployment \
+        --deployment-id "$1";
+}
+
+function pollForSpecificDeployment() {
+    deadlockCounter=0;
+
+    while true; do
+        RESPONSE=$(getSpecificDeployment "$1")
+        FAILED_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Failed')
+        IN_PROGRESS_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.InProgress')
+        SKIPPED_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Skipped')
+        SUCCESS_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Succeeded')
+        PENDING_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Pending')
+        STATUS=$(echo "$RESPONSE" | jq -r '.deploymentInfo.status')
+
+        echo -e "${ORANGE}Deployment in progress. Sleeping 15 seconds. (Try $((++deadlockCounter)))";
+        echo -e "Instance Overview: ${RED}Failed ($FAILED_COUNT), ${BLUE}In-Progress ($IN_PROGRESS_COUNT), ${RESET_TEXT}Skipped ($SKIPPED_COUNT), ${BLUE}Pending ($PENDING_COUNT), ${GREEN}Succeeded ($SUCCESS_COUNT)"
+        echo -e "Deployment Status: $STATUS"
+
+        if [ "$FAILED_COUNT" -gt 0 ]; then
+            echo -e "${RED}Failed instance detected (Failed count over zero)."
+            exit 1;
+        fi
+
+        if [ "$STATUS" = "Failed" ]; then
+            echo -e "${RED}Failed deployment detected (Failed status)."
+            exit 1;
+        fi
+
+        if [ "$STATUS" = "Succeeded" ]; then
+            break;
+        fi
+
+        if [ "$deadlockCounter" -gt "$INPUT_MAX_POLLING_ITERATIONS" ]; then
+            echo -e "${RED}Max polling iterations reached (max_polling_iterations)."
+            exit 1;
+        fi
+        sleep 15s;
+    done;
+}
+
+function pollForActiveDeployments() {
+    deadlockCounter=0;
+    while [ "$(getActiveDeployments)" != "[]" ]; do
+        echo -e "${ORANGE}Deployment in progress. Sleeping 15 seconds. (Try $((++deadlockCounter)))";
+
+        if [ "$deadlockCounter" -gt "$INPUT_MAX_POLLING_ITERATIONS" ]; then
+            echo -e "${RED}Max polling iterations reached (max_polling_iterations)."
+            exit 1;
+        fi
+        sleep 15s;
+    done;
+}
+
 # 0) Validation
 if [ -z "$INPUT_CODEDEPLOY_NAME" ] && [ -z "$INPUT_DRY_RUN" ]; then
     echo "::error::codedeploy_name is required and must not be empty."
@@ -114,13 +204,6 @@ echo "::debug::Zip Archived validated."
 echo "zip_filename=$ZIP_FILENAME" >> "$GITHUB_OUTPUT"
 
 # 3) Upload the deployment to S3, drop old archive.
-function getArchiveETag() {
-    aws s3api head-object \
-     --bucket "$INPUT_S3_BUCKET" \
-     --key "$INPUT_S3_FOLDER"/"$ZIP_FILENAME" \
-     --query ETag --output text
-}
-
 if "$INPUT_DRY_RUN"; then
     echo "::debug::Dry Run detected. Exiting."
     exit 0;
@@ -140,90 +223,9 @@ rm "$ZIP_FILENAME"
 echo "::debug::Removed old local ZIP Archive."
 
 # 4) Start the CodeDeploy
-function getActiveDeployments() {
-    if ! aws deploy list-deployments \
-        --application-name "$INPUT_CODEDEPLOY_NAME" \
-        --deployment-group-name "$INPUT_CODEDEPLOY_GROUP" \
-        --include-only-statuses "Queued" "InProgress" |  jq -r '.deployments'; then
-        echo -e "${ORANGE}Deployment may still be executing."
-        echo -e "${RED}Failed monitoring deployment (ListDeployments API call failed)."
-        exit 1;
-    fi
-}
-
-function getSpecificDeployment() {
-    aws deploy get-deployment \
-        --deployment-id "$1";
-}
-
-function pollForSpecificDeployment() {
-    deadlockCounter=0;
-
-    while true; do
-        RESPONSE=$(getSpecificDeployment "$1")
-        FAILED_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Failed')
-        IN_PROGRESS_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.InProgress')
-        SKIPPED_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Skipped')
-        SUCCESS_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Succeeded')
-        PENDING_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Pending')
-        STATUS=$(echo "$RESPONSE" | jq -r '.deploymentInfo.status')
-
-        echo -e "${ORANGE}Deployment in progress. Sleeping 15 seconds. (Try $((++deadlockCounter)))";
-        echo -e "Instance Overview: ${RED}Failed ($FAILED_COUNT), ${BLUE}In-Progress ($IN_PROGRESS_COUNT), ${RESET_TEXT}Skipped ($SKIPPED_COUNT), ${BLUE}Pending ($PENDING_COUNT), ${GREEN}Succeeded ($SUCCESS_COUNT)"
-        echo -e "Deployment Status: $STATUS"
-
-        if [ "$FAILED_COUNT" -gt 0 ]; then
-            echo -e "${RED}Failed instance detected (Failed count over zero)."
-            exit 1;
-        fi
-
-        if [ "$STATUS" = "Failed" ]; then
-            echo -e "${RED}Failed deployment detected (Failed status)."
-            exit 1;
-        fi
-
-        if [ "$STATUS" = "Succeeded" ]; then
-            break;
-        fi
-
-        if [ "$deadlockCounter" -gt "$INPUT_MAX_POLLING_ITERATIONS" ]; then
-            echo -e "${RED}Max polling iterations reached (max_polling_iterations)."
-            exit 1;
-        fi
-        sleep 15s;
-    done;
-}
-
-function pollForActiveDeployments() {
-    deadlockCounter=0;
-    while [ "$(getActiveDeployments)" != "[]" ]; do
-        echo -e "${ORANGE}Deployment in progress. Sleeping 15 seconds. (Try $((++deadlockCounter)))";
-
-        if [ "$deadlockCounter" -gt "$INPUT_MAX_POLLING_ITERATIONS" ]; then
-            echo -e "${RED}Max polling iterations reached (max_polling_iterations)."
-            exit 1;
-        fi
-        sleep 15s;
-    done;
-}
 pollForActiveDeployments
 
 # 5) Poll / Complete
-function deployRevision() {    
-    aws deploy create-deployment "$@" \
-        --application-name "$INPUT_CODEDEPLOY_NAME" \
-        --deployment-group-name "$INPUT_CODEDEPLOY_GROUP" \
-        --description "$GITHUB_REF - $GITHUB_SHA" \
-        --s3-location bucket="$INPUT_S3_BUCKET",bundleType="$BUNDLE_TYPE",eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" | jq -r '.deploymentId'
-}
-
-function registerRevision() {
-    aws deploy register-application-revision \
-        --application-name "$INPUT_CODEDEPLOY_NAME" \
-        --description "$GITHUB_REF - $GITHUB_SHA" \
-        --s3-location bucket="$INPUT_S3_BUCKET",bundleType="$BUNDLE_TYPE",eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" > /dev/null 2>&1
-}
-
 if $INPUT_CODEDEPLOY_REGISTER_ONLY; then
     echo -e "${BLUE}Registering deployment to ${RESET_TEXT}$INPUT_CODEDEPLOY_GROUP.";
     registerRevision
