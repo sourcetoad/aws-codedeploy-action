@@ -1,5 +1,5 @@
 # AWS CodeDeploy Action
-_To automatically deploy applications to EC2 via CodeDeploy._
+_To automatically deploy applications to EC2 via CodeDeploy. [Looking for ECS?](https://github.com/sourcetoad/aws-ecs-deploy-action)_
 
 ![](.github/aws-codedeploy-action.png)
 
