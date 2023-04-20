@@ -80,6 +80,16 @@ Following inputs can be used as `step.with` keys
 | `max_polling_iterations`   | No       | Number  | Number of 15s iterations to poll max. (default: `60`)           |
 | `dry_run`                  | No       | Boolean | If true, no connection to AWS is made. Just local zip creation. |
 
+### outputs
+
+Following outputs can be used after execution of the job.
+
+| Name            | Description                                      |
+|-----------------|--------------------------------------------------|
+| `zip_filename`  | Filename of generated zip file.                  |  
+| `etag`          | ETag for the generated zip file reported by AWS. |
+| `deployment_id` | The CodeDeploy deployment id                     |
+
 ## Skip waiting during deployment
 Some projects may not want to poll for a completion of a build. Setting `max_polling_iterations` to `0` will exit
 the script after the deployment was kicked off. Progress will have to be monitored elsewhere.
