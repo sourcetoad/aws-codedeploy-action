@@ -60,6 +60,8 @@ outputs:
     description: 'Filename of generated zip file.'
   etag:
     description: 'ETag for the generated zip file reported by AWS.'
+  deployment_id:
+    description: 'The CodeDeploy deployment id'
 runs:
     using: 'docker'
     image: 'Dockerfile'
