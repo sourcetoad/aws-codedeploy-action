@@ -238,6 +238,8 @@ else
         DEPLOYMENT_ID=$(deployRevision)
     fi
 
+    echo "deployment_id=$DEPLOYMENT_ID" >> "$GITHUB_OUTPUT"
+
     if [ "$INPUT_MAX_POLLING_ITERATIONS" -eq "0" ]; then
         echo -e "${BLUE}Iterations at 0. GitHub Action ending, but deployment in-progress to: ${RESET_TEXT}$INPUT_CODEDEPLOY_GROUP.";
     else
