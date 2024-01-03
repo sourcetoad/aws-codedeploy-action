@@ -51,7 +51,7 @@ function pollForSpecificDeployment() {
 
     while true; do
         RESPONSE=$(getSpecificDeployment "$1")
-        FAILED_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Failed')
+        FAILED_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Failed // "?"')
         IN_PROGRESS_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.InProgress')
         SKIPPED_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Skipped')
         SUCCESS_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Succeeded')
@@ -60,7 +60,7 @@ function pollForSpecificDeployment() {
 
         echo -e "${ORANGE}Deployment in progress. Sleeping 15 seconds. (Try $((++deadlockCounter)))";
 
-        if [ "$FAILED_COUNT" == "null" ]; then
+        if [ "$FAILED_COUNT" == "?" ]; then
             echo -e "Instance Overview: ${ORANGE}Currently Provisioning..."
             echo -e "Deployment Status: $STATUS"
         else
