@@ -51,7 +51,7 @@ function pollForSpecificDeployment() {
 
     while true; do
         RESPONSE=$(getSpecificDeployment "$1")
-        FAILED_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Failed')
+        FAILED_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Failed // "?"')
         IN_PROGRESS_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.InProgress')
         SKIPPED_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Skipped')
         SUCCESS_COUNT=$(echo "$RESPONSE" | jq -r '.deploymentInfo.deploymentOverview.Succeeded')
@@ -59,12 +59,18 @@ function pollForSpecificDeployment() {
         STATUS=$(echo "$RESPONSE" | jq -r '.deploymentInfo.status')
 
         echo -e "${ORANGE}Deployment in progress. Sleeping 15 seconds. (Try $((++deadlockCounter)))";
-        echo -e "Instance Overview: ${RED}Failed ($FAILED_COUNT), ${BLUE}In-Progress ($IN_PROGRESS_COUNT), ${RESET_TEXT}Skipped ($SKIPPED_COUNT), ${BLUE}Pending ($PENDING_COUNT), ${GREEN}Succeeded ($SUCCESS_COUNT)"
-        echo -e "Deployment Status: $STATUS"
 
-        if [ "$FAILED_COUNT" -gt 0 ]; then
-            echo -e "${RED}Failed instance detected (Failed count over zero)."
-            exit 1;
+        if [ "$FAILED_COUNT" == "?" ]; then
+            echo -e "Instance Overview: ${ORANGE}Currently Provisioning..."
+            echo -e "Deployment Status: $STATUS"
+        else
+            echo -e "Instance Overview: ${RED}Failed ($FAILED_COUNT), ${BLUE}In-Progress ($IN_PROGRESS_COUNT), ${RESET_TEXT}Skipped ($SKIPPED_COUNT), ${BLUE}Pending ($PENDING_COUNT), ${GREEN}Succeeded ($SUCCESS_COUNT)"
+            echo -e "Deployment Status: $STATUS"
+
+            if [ "$FAILED_COUNT" -gt 0 ]; then
+                echo -e "${RED}Failed instance detected (Failed count over zero)."
+                exit 1;
+            fi
         fi
 
         if [ "$STATUS" = "Failed" ]; then
@@ -80,6 +86,7 @@ function pollForSpecificDeployment() {
             echo -e "${RED}Max polling iterations reached (max_polling_iterations)."
             exit 1;
         fi
+
         sleep 15s;
     done;
 }
