@@ -1,5 +1,4 @@
 # AWS CodeDeploy Action
-
 _To automatically deploy applications to EC2 via CodeDeploy. [Looking for ECS?](https://github.com/sourcetoad/aws-ecs-deploy-action)_
 
 ![](.github/aws-codedeploy-action.png)
@@ -24,14 +23,14 @@ Laravel (All Properties) Example
     codedeploy_register_only: true
     s3_bucket: project-codedeploy
     s3_folder: production
-    excluded_files: ".git/* .env storage/framework/cache/* node_modules/*"
+    excluded_files: '.git/* .env storage/framework/cache/* node_modules/*'
     max_polling_iterations: 60
     directory: ./
 ```
 
 Laravel (Only Required) Example
 
-- This leverages the official [GitHub Action for AWS Credentials](https://github.com/marketplace/actions/configure-aws-credentials-action-for-github-actions)
+* This leverages the official [GitHub Action for AWS Credentials](https://github.com/marketplace/actions/configure-aws-credentials-action-for-github-actions)
 
 ```yaml
 - name: Configure AWS Credentials
@@ -49,12 +48,12 @@ Laravel (Only Required) Example
     s3_folder: production
 ```
 
-- Remember to set specific permissions so we can communicate with the GitHub OIDC Endpoint.
+* Remember to set specific permissions so we can communicate with the GitHub OIDC Endpoint.
 
 ```yaml
 permissions:
-  id-token: write
-  contents: read
+    id-token: write
+    contents: read
 ```
 
 ## Customizing
@@ -64,7 +63,7 @@ permissions:
 Following inputs can be used as `step.with` keys
 
 | Name                              | Required | Type    | Description                                                       |
-| --------------------------------- | -------- | ------- | ----------------------------------------------------------------- |
+|-----------------------------------|----------|---------|-------------------------------------------------------------------|
 | `aws_access_key`                  | No       | String  | IAM Access Key.                                                   |
 | `aws_secret_key`                  | No       | String  | IAM Secret Key.                                                   |
 | `aws_region`                      | No       | String  | AWS Region (default: `us-east-1`).                                |
@@ -87,31 +86,29 @@ Following inputs can be used as `step.with` keys
 Following outputs can be used after execution of the job.
 
 | Name            | Description                                      |
-| --------------- | ------------------------------------------------ |
-| `zip_filename`  | Filename of generated zip file.                  |
+|-----------------|--------------------------------------------------|
+| `zip_filename`  | Filename of generated zip file.                  |  
 | `etag`          | ETag for the generated zip file reported by AWS. |
 | `deployment_id` | The CodeDeploy deployment id                     |
 
 ## Skip waiting during deployment
-
 Some projects may not want to poll for a completion of a build. Setting `max_polling_iterations` to `0` will exit
 the script after the deployment was kicked off. Progress will have to be monitored elsewhere.
 
 ## Archive or Build
-
 Some projects may have a complex build system or even build the archive in a previous step. This is where
 `directory` and `archive` come into play:
 
-- By default, `directory` will be used to zip that directory and deployed.
-- If `archive` is non-empty, it will be used in place of `directory`
-- `archive` must be zip filename including extension (ie `prod-backend-20220202.zip`).
+ * By default, `directory` will be used to zip that directory and deployed.
+ * If `archive` is non-empty, it will be used in place of `directory`
+ * `archive` must be zip filename including extension (ie `prod-backend-20220202.zip`).
 
 ## IAM Permissions
 
-You shouldn't be using a root user. Below are snippets of an inline policies with suggested permissions for the action.
+You shouldn't be using a root user. Below are snippets of an inline policies with suggested permissions for the action. 
 
-- You might need to adapt these to fit your use case.
-- You will need to insert proper resources/ARNs to make the snippets below valid.
+ * You might need to adapt these to fit your use case.
+ * You will need to insert proper resources/ARNs to make the snippets below valid.
 
 ```json
 {
@@ -126,39 +123,44 @@ You shouldn't be using a root user. Below are snippets of an inline policies wit
         "s3:ListMultipartUploadParts",
         "s3:AbortMultipartUpload"
       ],
-      "Resource": ["arn:aws:s3:::project-codedeploy/*"]
+      "Resource": [
+        "arn:aws:s3:::project-codedeploy/*"
+      ]
     }
   ]
 }
 ```
 
-- This restricts the action to uploading an object and listing/getting the object so it can obtain the location for CodeDeploy
-- It is restricted to a specific bucket.
+ * This restricts the action to uploading an object and listing/getting the object so it can obtain the location for CodeDeploy
+ * It is restricted to a specific bucket.
 
 For deploying via CodeDeploy you will need another set of permissions.
-
 ```json
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": ["codedeploy:CreateDeployment"],
-      "Effect": "Allow",
-      "Resource": ["arn:aws:codedeploy:codedeploy-arn"]
-    },
-    {
-      "Action": [
-        "codedeploy:Batch*",
-        "codedeploy:Get*",
-        "codedeploy:List*",
-        "codedeploy:RegisterApplicationRevision"
-      ],
-      "Effect": "Allow",
-      "Resource": "*"
-    }
-  ]
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "codedeploy:CreateDeployment"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:codedeploy:codedeploy-arn"
+            ]
+        },
+        {
+            "Action": [
+                "codedeploy:Batch*",
+                "codedeploy:Get*",
+                "codedeploy:List*",
+                "codedeploy:RegisterApplicationRevision"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        }
+    ]
 }
 ```
 
-- These permissions are a rough example of allowing the user to list/get/register a revision for all resources
-- A specific permission statement exists to lock creating the deployment to a specific resource
+ * These permissions are a rough example of allowing the user to list/get/register a revision for all resources
+ * A specific permission statement exists to lock creating the deployment to a specific resource
