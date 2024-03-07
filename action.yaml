@@ -47,6 +47,10 @@ inputs:
     description: 'Whether to register the deployment (vs automatic deploy).'
     required: false
     default: 'false'
+  codedeploy_file_exists_behavior:
+    description: 'What to do if the file already exists in the deployment location. Possible options are DISSALOW|OVERWRITE|RETAIN'
+    required: false
+    default: 'DISALLOW'
   max_polling_iterations:
     description: 'Max amount of iterations (15s increments) to wait for a deployment'
     required: false
