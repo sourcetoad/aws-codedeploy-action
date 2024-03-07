@@ -20,6 +20,7 @@ function deployRevision() {
         --application-name "$INPUT_CODEDEPLOY_NAME" \
         --deployment-group-name "$INPUT_CODEDEPLOY_GROUP" \
         --description "$GITHUB_REF - $GITHUB_SHA" \
+        --file-exists-behavior "${INPUT_CODEDEPLOY_FILE_EXISTS_BEHAVIOR}" \
         --s3-location bucket="$INPUT_S3_BUCKET",bundleType="$BUNDLE_TYPE",eTag="$ZIP_ETAG",key="$INPUT_S3_FOLDER"/"$ZIP_FILENAME" | jq -r '.deploymentId'
 }
 

@@ -1,69 +1,73 @@
-name: 'Sourcetoad - AWS CodeDeploy for GitHub Actions'
-description: 'Deploy projects to EC2 via CodeDeploy for GitHub Actions'
+name: "Sourcetoad - AWS CodeDeploy for GitHub Actions"
+description: "Deploy projects to EC2 via CodeDeploy for GitHub Actions"
 author: Sourcetoad
 branding:
-  color: 'yellow'
-  icon: 'server'
+  color: "yellow"
+  icon: "server"
 
 inputs:
   aws_access_key:
-    description: 'AWS Access Key (Required if no aws-actions/configure-aws-credentials)'
+    description: "AWS Access Key (Required if no aws-actions/configure-aws-credentials)"
     required: false
   aws_secret_key:
-    description: 'AWS Secret Key (Required if no aws-actions/configure-aws-credentials)'
+    description: "AWS Secret Key (Required if no aws-actions/configure-aws-credentials)"
     required: false
   aws_region:
-    description: 'AWS Region'
+    description: "AWS Region"
     required: false
-    default: 'us-east-1'
+    default: "us-east-1"
   s3_bucket:
-    description: 'S3 Bucket for CodeDeploy Assets'
+    description: "S3 Bucket for CodeDeploy Assets"
     required: true
   s3_folder:
-    description: 'S3 Folder for ZIP.'
+    description: "S3 Folder for ZIP."
     required: true
   directory:
-    description: 'Directory to be archived instead of entire workspace.'
+    description: "Directory to be archived instead of entire workspace."
     required: false
   archive:
-    description: 'Zip to be used for deployment, instead of archiving a directory.'
+    description: "Zip to be used for deployment, instead of archiving a directory."
     required: false
   custom_zip_flags:
-    description: 'Custom flags to be passed to zip during archiving.'
+    description: "Custom flags to be passed to zip during archiving."
     required: false
   excluded_files:
-    description: 'Files to be excluded during archiving (space delimited).'
+    description: "Files to be excluded during archiving (space delimited)."
     required: false
   codedeploy_name:
-    description: 'AWS CodeDeploy Application Name'
+    description: "AWS CodeDeploy Application Name"
     required: true
   codedeploy_group:
-    description: 'AWS CodeDeploy Application Group'
+    description: "AWS CodeDeploy Application Group"
     required: true
   codedeploy_config_name:
-    description: 'Override the AWS CodeDeploy configuration name'
+    description: "Override the AWS CodeDeploy configuration name"
     required: false
   codedeploy_register_only:
-    description: 'Whether to register the deployment (vs automatic deploy).'
+    description: "Whether to register the deployment (vs automatic deploy)."
     required: false
-    default: 'false'
+    default: "false"
+  codedeploy_file_exists_behavior:
+    description: "What to do if the file already exists in the deployment location."
+    required: false
+    default: "DISALLOW"
   max_polling_iterations:
-    description: 'Max amount of iterations (15s increments) to wait for a deployment'
+    description: "Max amount of iterations (15s increments) to wait for a deployment"
     required: false
-    default: '60'
+    default: "60"
   dry_run:
-    description: 'Whether to skip all AWS related steps.'
+    description: "Whether to skip all AWS related steps."
     required: false
-    default: 'false'
+    default: "false"
 outputs:
   zip_filename:
-    description: 'Filename of generated zip file.'
+    description: "Filename of generated zip file."
   etag:
-    description: 'ETag for the generated zip file reported by AWS.'
+    description: "ETag for the generated zip file reported by AWS."
   deployment_id:
-    description: 'The CodeDeploy deployment id'
+    description: "The CodeDeploy deployment id"
 runs:
-    using: 'docker'
-    image: 'Dockerfile'
-    entrypoint: '/deploy.sh'
-    post-entrypoint: '/cleanup.sh'
+  using: "docker"
+  image: "Dockerfile"
+  entrypoint: "/deploy.sh"
+  post-entrypoint: "/cleanup.sh"
