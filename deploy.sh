@@ -190,6 +190,9 @@ case "$ZIP_FILENAME" in
     *.tar.gz)
         BUNDLE_TYPE=tgz
         ;;
+    *.tgz)
+        BUNDLE_TYPE=tgz
+        ;;
     *)
         # assume it's a zipfile
         BUNDLE_TYPE=zip
