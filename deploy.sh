@@ -187,10 +187,7 @@ case "$ZIP_FILENAME" in
     *.tar)
         BUNDLE_TYPE=tar
         ;;
-    *.tar.gz)
-        BUNDLE_TYPE=tgz
-        ;;
-    *.tgz)
+    *.tar.gz|*.tgz)
         BUNDLE_TYPE=tgz
         ;;
     *)
