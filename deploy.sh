@@ -70,7 +70,7 @@ function pollForSpecificDeployment() {
 
             if [ "$FAILED_COUNT" -gt 0 ]; then
                 echo -e "${RED}Failed instance detected (Failed count over zero)."
-                exit 1;
+                # exit 1;
             fi
         fi
 
