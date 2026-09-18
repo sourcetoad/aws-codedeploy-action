@@ -106,17 +106,17 @@ function pollForActiveDeployments() {
 }
 
 # 0) Validation
-if [ -z "$INPUT_CODEDEPLOY_NAME" ] && [ -z "$INPUT_DRY_RUN" ]; then
+if [ -z "$INPUT_CODEDEPLOY_NAME" ] && [ "$INPUT_DRY_RUN" != "true" ]; then
     echo "::error::codedeploy_name is required and must not be empty."
     exit 1;
 fi
 
-if [ -z "$INPUT_CODEDEPLOY_GROUP" ] && [ -z "$INPUT_DRY_RUN" ]; then
+if [ -z "$INPUT_CODEDEPLOY_GROUP" ] && [ "$INPUT_DRY_RUN" != "true" ]; then
     echo "::error::codedeploy_group is required and must not be empty."
     exit 1;
 fi
 
-if [ -z "$INPUT_S3_BUCKET" ] && [ -z "$INPUT_DRY_RUN" ]; then
+if [ -z "$INPUT_S3_BUCKET" ] && [ "$INPUT_DRY_RUN" != "true" ]; then
     echo "::error::s3_bucket is required and must not be empty."
     exit 1;
 fi
