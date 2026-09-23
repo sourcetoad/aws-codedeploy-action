@@ -6,3 +6,16 @@ updates:
       interval: daily
       time: "08:00"
       timezone: "America/New_York"
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: monthly
+      time: "08:00"
+      timezone: "America/New_York"
+    commit-message:
+      prefix: build
+      include: scope
+    ignore:
+      - dependency-name: amazon/aws-cli
+        update-types: ["version-update:semver-major"]
